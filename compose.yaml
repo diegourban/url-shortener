@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: url-shortener-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: url_shortener
+      POSTGRES_USER: app-url-shortener
+      POSTGRES_PASSWORD: s3cr3t
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app-url-shortener -d url_shortener"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

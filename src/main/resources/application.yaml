@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: url-shortener
+  mvc:
+    problemdetails:
+      enabled: true
