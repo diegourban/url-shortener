@@ -10,7 +10,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("itest")
 public abstract class UrlShortenerApplicationTests {
 
     protected static final String BASE_URL = "/api/v1";
