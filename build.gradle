@@ -1,9 +1,11 @@
 plugins {
     id 'java'
+    id "idea"
     id 'org.springframework.boot' version '4.0.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.openapi.generator' version '7.19.0'
     id 'com.avast.gradle.docker-compose' version '0.17.21'
+    id 'com.softeq.gradle.itest' version '1.0.4'
 }
 
 group = 'dev.diegourban'
@@ -40,7 +42,14 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    itestImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    itestImplementation 'org.springframework.boot:spring-boot-starter-liquibase-test'
+    itestImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+    itestImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    itestImplementation 'org.junit.jupiter:junit-jupiter-api'
+    itestImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    itestImplementation 'org.hamcrest:hamcrest:2.2'
+    itestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 openApiGenerate {
@@ -67,9 +76,22 @@ sourceSets {
             srcDir("$buildDir/generated/src/main/java")
         }
     }
+    itest {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+            srcDir 'src/itest/java'
+        }
+        resources {
+            srcDir 'src/itest/resources'
+        }
+    }
 }
 
 tasks.named('compileJava') {
+    dependsOn tasks.named('openApiGenerate')
+}
+
+tasks.named('compileItestJava') {
     dependsOn tasks.named('openApiGenerate')
 }
 
@@ -77,4 +99,26 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-dockerCompose.isRequiredBy(test)
+integrationTest {
+    useJUnitPlatform()
+}
+
+idea {
+    module {
+        // prevents intellij marking directories as production source
+        // might need `./gradlew cleanIdea idea` to recreate project files
+        testSources.from(project.sourceSets.itest.java.srcDirs)
+        testResources.from(project.sourceSets.itest.resources.srcDirs)
+    }
+}
+
+itestSourceSet {
+    compileClasspath = sourceSets.main.compileClasspath
+    runtimeClasspath = sourceSets.main.runtimeClasspath
+}
+
+dockerCompose.isRequiredBy(integrationTest)
+
+tasks.named('processItestResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
