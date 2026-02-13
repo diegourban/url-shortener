@@ -4,3 +4,7 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  jpa:
+    open-in-view: false
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml

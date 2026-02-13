@@ -28,3 +28,10 @@ jobs:
         run: ./gradlew check
         env:
           SPRING_PROFILES_ACTIVE: itest
+
+      - name: Build & push Docker image
+        run: ./gradlew jib
+        env:
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}

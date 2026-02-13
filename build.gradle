@@ -6,6 +6,7 @@ plugins {
     id 'org.openapi.generator' version '7.19.0'
     id 'com.avast.gradle.docker-compose' version '0.17.21'
     id 'com.softeq.gradle.itest' version '1.0.4'
+    id 'com.google.cloud.tools.jib' version '3.4.2'
 }
 
 group = 'dev.diegourban'
@@ -122,3 +123,29 @@ dockerCompose.isRequiredBy(integrationTest)
 tasks.named('processItestResources') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+jib {
+    from {
+        image = "gcr.io/distroless/java25-debian13"
+    }
+
+    to {
+        image = "ghcr.io/diegourban/url-shortener"
+        tags = ["latest", System.getenv("GITHUB_SHA") ?: "local"]
+        auth {
+            username = System.getenv("GHCR_USERNAME")
+            password = System.getenv("GHCR_TOKEN")
+        }
+    }
+
+    container {
+        mainClass = "dev.diegourban.url_shortener.UrlShortenerApplication"
+        ports = ["5000"]
+        jvmFlags = [
+                "-XX:+UseContainerSupport",
+                "-XX:MaxRAMPercentage=75.0"
+        ]
+        creationTime = "USE_CURRENT_TIMESTAMP"
+    }
+}
+
