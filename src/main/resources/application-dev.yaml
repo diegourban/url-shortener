@@ -4,12 +4,6 @@ spring:
     username: app-url-shortener
     password: s3cr3t
     driver-class-name: org.postgresql.Driver
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-  liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.xml
 
 url-shortener:
   base-url: http://localhost:8080
