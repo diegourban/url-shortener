@@ -142,7 +142,7 @@ jib {
 
     container {
         mainClass = "dev.diegourban.url_shortener.UrlShortenerApplication"
-        ports = ["5000"]
+        ports = ["8080"]
         jvmFlags = [
                 "-XX:+UseContainerSupport",
                 "-XX:MaxRAMPercentage=75.0"
