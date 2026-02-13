@@ -133,8 +133,8 @@ jib {
         image = "ghcr.io/diegourban/url-shortener"
         tags = ["latest", System.getenv("GITHUB_SHA") ?: "local"]
         auth {
-            username = System.getenv("GHCR_USERNAME")
-            password = System.getenv("GHCR_TOKEN")
+            username  = providers.environmentVariable("GHCR_USERNAME")
+            password = providers.environmentVariable("GHCR_TOKEN")
         }
     }
 
