@@ -106,8 +106,7 @@ integrationTest {
 
 idea {
     module {
-        // prevents intellij marking directories as production source
-        // might need `./gradlew cleanIdea idea` to recreate project files
+        // avoid intellij make directories as production source
         testSources.from(project.sourceSets.itest.java.srcDirs)
         testResources.from(project.sourceSets.itest.resources.srcDirs)
     }
@@ -118,7 +117,10 @@ itestSourceSet {
     runtimeClasspath = sourceSets.main.runtimeClasspath
 }
 
-dockerCompose.isRequiredBy(integrationTest)
+dockerCompose {
+    upAdditionalArgs = [ '--quiet-pull']
+    isRequiredBy(tasks.integrationTest)
+}
 
 tasks.named('processItestResources') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
