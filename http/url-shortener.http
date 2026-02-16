@@ -1,0 +1,10 @@
+### Health check
+GET http://localhost:8080/actuator/health
+
+### createShortUrl
+POST http://localhost:8080/api/v1/urls
+Content-Type: application/json
+
+{
+    "longUrl": "https://www.example.com/some/very/long/url"
+}
