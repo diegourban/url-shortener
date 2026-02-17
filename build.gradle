@@ -130,6 +130,12 @@ tasks.named('processItestResources') {
 jib {
     from {
         image = "gcr.io/distroless/java25-debian13"
+        platforms {
+            platform {
+                architecture = "arm64"
+                os = "linux"
+            }
+        }
     }
 
     to {

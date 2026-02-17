@@ -13,8 +13,6 @@ services:
   app:
     image: ghcr.io/diegourban/url-shortener:latest
     env_file: .env
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
     depends_on:
       postgres:
         condition: service_healthy
