@@ -6,7 +6,6 @@ spec:
   selector:
     app: urlshortener
   ports:
-    - port: 8080       # Cluster internal port
+    - port: 8080
       targetPort: 8080
-      nodePort: 30080  # NodePort for local access
-  type: NodePort
+  type: ClusterIP
