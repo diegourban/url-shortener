@@ -127,6 +127,25 @@ tasks.named('processItestResources') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+def otelAgentVersion = "2.25.0"
+
+configurations {
+    otel
+}
+
+dependencies {
+    otel "io.opentelemetry.javaagent:opentelemetry-javaagent:${otelAgentVersion}"
+}
+
+tasks.register('copyOtelAgent', Copy) {
+    from configurations.otel
+    into layout.buildDirectory.dir("otel")
+    rename { "opentelemetry-javaagent.jar" }
+}
+
+tasks.named('jib') { dependsOn 'copyOtelAgent' }
+tasks.named('jibDockerBuild') { dependsOn 'copyOtelAgent' }
+
 jib {
     from {
         image = "gcr.io/distroless/java25-debian13"
@@ -147,12 +166,26 @@ jib {
         }
     }
 
+    extraDirectories {
+        paths {
+            path {
+                from = layout.buildDirectory.dir("otel")
+                into = "/otel"
+            }
+        }
+    }
+
     container {
         mainClass = "dev.diegourban.url_shortener.UrlShortenerApplication"
         ports = ["8080"]
         jvmFlags = [
                 "-XX:+UseContainerSupport",
-                "-XX:MaxRAMPercentage=75.0"
+                "-XX:MaxRAMPercentage=75.0",
+                "-javaagent:/otel/opentelemetry-javaagent.jar"
+        ]
+        environment = [
+                "OTEL_SERVICE_NAME": "url-shortener",
+                "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4318"
         ]
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
