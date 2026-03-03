@@ -1,6 +1,7 @@
 package dev.diegourban.url_shortener.domain.service;
 
 import java.net.URI;
+import java.util.Optional;
 
 import dev.diegourban.url_shortener.AbstractUnitTest;
 import dev.diegourban.url_shortener.application.command.CreateShortUrlCommand;
@@ -32,7 +33,25 @@ class UrlShorteningServiceTest extends AbstractUnitTest {
 
         final var createShortUrlCommand = new CreateShortUrlCommand(URI.create("https://www.example.com"));
         final var shortUrl = urlShorteningService.createShortUrl(createShortUrlCommand);
-        assertThat(shortUrl.code()).isEqualTo("AAAAAAAAAAE");
-        assertThat(shortUrl.shortUrl()).isEqualTo(URI.create("http://localhost/AAAAAAAAAAE"));
+        assertThat(shortUrl.code()).isEqualTo("AQ");
+        assertThat(shortUrl.shortUrl()).isEqualTo(URI.create("http://localhost/AQ"));
+    }
+
+    @Test
+    void resolveShortUrl_existingCode_returnsOriginalUrl() {
+        when(shortUrlRepository.findOriginalUrlById(1L)).thenReturn(Optional.of("https://www.example.com"));
+
+        final var result = urlShorteningService.resolveShortUrl("AQ");
+
+        assertThat(result).contains(URI.create("https://www.example.com"));
+    }
+
+    @Test
+    void resolveShortUrl_unknownCode_returnsEmpty() {
+        when(shortUrlRepository.findOriginalUrlById(1L)).thenReturn(Optional.empty());
+
+        final var result = urlShorteningService.resolveShortUrl("AQ");
+
+        assertThat(result).isEmpty();
     }
 }

@@ -2,6 +2,8 @@ package dev.diegourban.url_shortener.domain.service;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Optional;
 
 import dev.diegourban.url_shortener.application.command.CreateShortUrlCommand;
 import dev.diegourban.url_shortener.config.UrlShortenerProperties;
@@ -23,9 +25,22 @@ public class UrlShorteningService {
     public ShortUrl createShortUrl(final CreateShortUrlCommand createShortUrlCommand) {
         final long id = shortUrlRepository.save(createShortUrlCommand.longUrl().toString());
 
-        final byte[] array = ByteBuffer.allocate(Long.BYTES).putLong(id).array();
-        final String code = base64.encodeToString(array);
+        final byte[] fullBytes = ByteBuffer.allocate(Long.BYTES).putLong(id).array();
+        int start = 0;
+        while (start < fullBytes.length - 1 && fullBytes[start] == 0) {
+            start++;
+        }
+        final byte[] trimmed = Arrays.copyOfRange(fullBytes, start, fullBytes.length);
+        final String code = base64.encodeToString(trimmed);
         return new ShortUrl(code, URI.create(urlShortenerProperties.getBaseUrl() + "/" + code));
+    }
+
+    public Optional<URI> resolveShortUrl(final String shortCode) {
+        final byte[] decoded = base64.decode(shortCode);
+        final byte[] padded = new byte[Long.BYTES];
+        System.arraycopy(decoded, 0, padded, Long.BYTES - decoded.length, decoded.length);
+        final long id = ByteBuffer.wrap(padded).getLong();
+        return shortUrlRepository.findOriginalUrlById(id).map(URI::create);
     }
 
 }
